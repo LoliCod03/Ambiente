@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quiz – Gestión Ambiental Unidades 4-7</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #F4F2EC; --surface: #FFFFFF; --surface2: #F8F7F2;
+    --teal: #1D9E75; --teal-light: #E1F5EE; --teal-dark: #085041;
+    --blue: #2A5FAC; --blue-light: #E8EFF9;
+    --green: #639922; --green-light: #EAF3DE; --green-dark: #27500A;
+    --red: #E24B4A; --red-light: #FCEBEB; --red-dark: #501313;
+    --gray-100: #D3D1C7; --gray-200: #B4B2A9;
+    --text: #1a1a18; --text-muted: #6b6b68;
+    --radius: 14px; --radius-sm: 8px;
+  }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; align-items: flex-start; justify-content: center; padding: 2rem 1rem 4rem; }
+  .container { width: 100%; max-width: 680px; }
+  .site-header { text-align: center; margin-bottom: 2rem; padding-top: 1rem; }
+  .badge { display: inline-block; background: var(--teal-light); color: var(--teal-dark); font-family: 'Syne', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; padding: 5px 14px; border-radius: 999px; border: 1px solid #9FE1CB; margin-bottom: 12px; }
+  .site-header h1 { font-family: 'Syne', sans-serif; font-size: 26px; font-weight: 800; line-height: 1.2; }
+  .site-header p { font-size: 14px; color: var(--text-muted); margin-top: 6px; }
+  .screen { display: none; }
+  .screen.active { display: block; }
+  .start-card { background: var(--surface); border: 1px solid var(--gray-100); border-radius: var(--radius); padding: 3rem 2rem; text-align: center; }
+  .start-icon { font-size: 60px; margin-bottom: 1.25rem; display: block; animation: float 3s ease-in-out infinite; }
+  @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+  .start-card h2 { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 700; margin-bottom: 8px; }
+  .start-card p { font-size: 14px; color: var(--text-muted); margin-bottom: 2rem; line-height: 1.6; }
+  .stats-row { display: flex; justify-content: center; gap: 10px; margin-bottom: 2rem; flex-wrap: wrap; }
+  .stat-pill { background: var(--surface2); border: 1px solid var(--gray-100); border-radius: 999px; padding: 6px 16px; font-size: 13px; color: var(--text-muted); }
+  .stat-pill strong { color: var(--text); }
+  .btn-start { display: inline-block; background: var(--teal); color: #fff; font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; padding: 14px 40px; border-radius: 999px; border: none; cursor: pointer; transition: transform 0.15s, background 0.15s; letter-spacing: 0.02em; }
+  .btn-start:hover { background: #16795a; transform: scale(1.03); }
+  .game-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  .prog-label { font-size: 13px; color: var(--text-muted); font-weight: 500; }
+  .score-chip { background: var(--surface); border: 1px solid var(--gray-100); border-radius: 999px; padding: 5px 14px; font-size: 13px; font-weight: 500; color: var(--text); }
+  .score-chip span { color: var(--teal); font-family: 'Syne', sans-serif; font-weight: 700; }
+  .progress-track { height: 6px; background: var(--gray-100); border-radius: 3px; margin-bottom: 1.25rem; overflow: hidden; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--teal), var(--blue)); border-radius: 3px; transition: width 0.5s cubic-bezier(0.4,0,0.2,1); }
+  .question-card { background: var(--surface); border: 1px solid var(--gray-100); border-radius: var(--radius); padding: 1.5rem; margin-bottom: 1rem; }
+  .q-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  .q-num { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--teal); font-family: 'Syne', sans-serif; }
+  .q-theme { font-size: 11px; color: var(--text-muted); background: var(--surface2); padding: 3px 10px; border-radius: 999px; }
+  .q-text { font-family: 'Syne', sans-serif; font-size: 17px; font-weight: 600; line-height: 1.5; color: var(--text); }
+  .answers-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 1rem; }
+  @media (max-width: 480px) { .answers-grid { grid-template-columns: 1fr; } }
+  .answer-btn { display: flex; align-items: flex-start; gap: 10px; padding: 14px; background: var(--surface); border: 1px solid var(--gray-100); border-radius: var(--radius-sm); cursor: pointer; font-size: 13px; font-family: 'DM Sans', sans-serif; color: var(--text); text-align: left; line-height: 1.5; transition: border-color 0.15s, background 0.15s, transform 0.1s; }
+  .answer-btn:hover:not(:disabled) { border-color: var(--gray-200); background: var(--surface2); }
+  .answer-btn:active:not(:disabled) { transform: scale(0.98); }
+  .answer-btn:disabled { cursor: default; }
+  .ans-icon { width: 24px; height: 24px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; font-family: 'Syne', sans-serif; flex-shrink: 0; }
+  .icon-a { background: #CECBF6; color: #3C3489; }
+  .icon-b { background: #9FE1CB; color: #085041; }
+  .icon-c { background: #FAC775; color: #633806; }
+  .icon-d { background: #F5C4B3; color: #712B13; }
+  .answer-btn.correct { background: var(--green-light); border-color: var(--green); color: var(--green-dark); }
+  .answer-btn.wrong { background: var(--red-light); border-color: var(--red); color: var(--red-dark); }
+  .answer-btn.reveal-correct { background: var(--green-light); border-color: var(--green); color: var(--green-dark); }
+  .feedback { border-radius: var(--radius-sm); padding: 12px 16px; font-size: 13px; line-height: 1.6; margin-bottom: 1rem; display: none; }
+  .feedback.correct { background: var(--green-light); border: 1px solid var(--green); color: var(--green-dark); }
+  .feedback.wrong { background: var(--red-light); border: 1px solid var(--red); color: var(--red-dark); }
+  .btn-next { width: 100%; padding: 13px; border-radius: var(--radius-sm); border: 1px solid var(--gray-100); background: var(--surface); font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; color: var(--text); cursor: pointer; display: none; transition: background 0.15s; }
+  .btn-next:hover { background: var(--surface2); border-color: var(--gray-200); }
+  .end-card { background: var(--surface); border: 1px solid var(--gray-100); border-radius: var(--radius); padding: 2.5rem 2rem; text-align: center; }
+  .trophy { font-size: 56px; display: block; margin-bottom: 1rem; }
+  .end-score-big { font-family: 'Syne', sans-serif; font-size: 52px; font-weight: 800; color: var(--teal); line-height: 1; margin-bottom: 4px; }
+  .end-sub { font-size: 14px; color: var(--text-muted); margin-bottom: 1.5rem; }
+  .end-stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 1.5rem; }
+  .stat-card { background: var(--surface2); border-radius: var(--radius-sm); padding: 14px 10px; }
+  .stat-val { font-family: 'Syne', sans-serif; font-size: 24px; font-weight: 800; color: var(--text); }
+  .stat-lbl { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+  .end-msg { font-size: 15px; color: var(--text); font-style: italic; margin-bottom: 1.75rem; }
+  .btn-restart { display: inline-block; background: var(--surface2); color: var(--text); border: 1px solid var(--gray-100); border-radius: 999px; padding: 12px 32px; font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; cursor: pointer; transition: background 0.15s; }
+  .btn-restart:hover { background: var(--gray-100); }
+  .footer { text-align: center; margin-top: 2rem; font-size: 12px; color: var(--gray-200); }
+</style>
+</head>
+<body>
+<div class="container">
+  <header class="site-header">
+    <div class="badge">🌱 Unidades 4 · 5 · 6 · 7</div>
+    <h1>Ambiente y Sostenibilidad</h1>
+    <p>Gestión de Residuos · Ética Ambiental · Recursos Hídricos · Energía</p>
+  </header>
+
+  <div id="start-screen" class="screen active">
+    <div class="start-card">
+      <span class="start-icon">♻️</span>
+      <h2>¿Listo para el quiz?</h2>
+      <p>Pon a prueba tus conocimientos sobre residuos, microplásticos, huellas ambientales, cuencas hidrográficas y energías renovables.</p>
+      <div class="stats-row">
+        <div class="stat-pill"><strong>25</strong> preguntas</div>
+        <div class="stat-pill"><strong>100</strong> pts c/u</div>
+        <div class="stat-pill">Orden <strong>aleatorio</strong></div>
+      </div>
+      <button class="btn-start" onclick="startGame()">¡Comenzar! →</button>
+    </div>
+  </div>
+
+  <div id="game-screen" class="screen">
+    <div class="game-top">
+      <span class="prog-label" id="prog-text">Pregunta 1 de 25</span>
+      <div class="score-chip">⭐ <span id="score-display">0</span> pts</div>
+    </div>
+    <div class="progress-track"><div class="progress-fill" id="prog-bar" style="width:4%"></div></div>
+    <div class="question-card">
+      <div class="q-meta">
+        <span class="q-num" id="q-num">Pregunta 1</span>
+        <span class="q-theme" id="q-theme"></span>
+      </div>
+      <div class="q-text" id="q-text"></div>
+    </div>
+    <div class="answers-grid" id="answers"></div>
+    <div class="feedback" id="feedback"></div>
+    <button class="btn-next" id="next-btn" onclick="nextQuestion()">Siguiente →</button>
+  </div>
+
+  <div id="end-screen" class="screen">
+    <div class="end-card">
+      <span class="trophy" id="trophy">🏆</span>
+      <div class="end-score-big" id="end-score"></div>
+      <div class="end-sub" id="end-sub"></div>
+      <div class="end-stats">
+        <div class="stat-card"><div class="stat-val" id="s-correct"></div><div class="stat-lbl">Correctas</div></div>
+        <div class="stat-card"><div class="stat-val" id="s-wrong"></div><div class="stat-lbl">Incorrectas</div></div>
+        <div class="stat-card"><div class="stat-val" id="s-pct"></div><div class="stat-lbl">Porcentaje</div></div>
+      </div>
+      <div class="end-msg" id="end-msg"></div>
+      <button class="btn-restart" onclick="restartGame()">↩ Volver a jugar</button>
+    </div>
+  </div>
+
+  <div class="footer">Quiz · Ambiente y Sostenibilidad – Unidades 4, 5, 6 y 7</div>
+</div>
+
+<script>
+const allQuestions = [
+  // UNIDAD 4 – Gestión de Residuos
+  { q: "¿Cuál es la principal ventaja de la separación de residuos en la fuente?", opts: ["Reduce los costos de recolección de basura","Permite clasificar residuos para optimizar su tratamiento y evitar que los reciclables se contaminen","Elimina la necesidad de rellenos sanitarios","Aumenta la cantidad de residuos que se pueden quemar"], ans: 1, exp: "La separación en la fuente clasifica los residuos en orgánicos, reciclables, peligrosos y no aprovechables, evitando contaminación cruzada y optimizando su tratamiento.", tema: "U4 Residuos" },
+  { q: "¿Qué tipo de residuo es un medicamento vencido?", opts: ["Orgánico","Reciclable","Peligroso","No aprovechable"], ans: 2, exp: "Los medicamentos vencidos son residuos peligrosos porque pueden ser tóxicos o infecciosos, representando un riesgo para la salud y el ambiente si se desechan inadecuadamente.", tema: "U4 Residuos" },
+  { q: "¿Qué son los microplásticos?", opts: ["Plásticos biodegradables de gran tamaño","Partículas de plástico de menos de 5 milímetros","Residuos industriales metálicos","Fragmentos de vidrio menores a 1 cm"], ans: 1, exp: "Los microplásticos son partículas de plástico de menos de 5 milímetros, generadas por degradación de plásticos más grandes o fabricadas directamente en ese tamaño.", tema: "U4 Microplásticos" },
+  { q: "¿Cuál es la diferencia entre microplásticos primarios y secundarios?", opts: ["Los primarios son más grandes que los secundarios","Los primarios se fabrican directamente en tamaño microscópico; los secundarios se originan de la fragmentación de plásticos más grandes","Los secundarios son más peligrosos que los primarios","Los primarios vienen del mar; los secundarios de la tierra"], ans: 1, exp: "Los microplásticos primarios se fabrican directamente en tamaño microscópico (microesferas en cosméticos, pellets industriales); los secundarios resultan de la fragmentación de objetos plásticos más grandes.", tema: "U4 Microplásticos" },
+  { q: "¿Cuál es la etapa más importante dentro de la gestión integral de residuos sólidos según el documento?", opts: ["La disposición final en rellenos sanitarios","La recolección y transporte","La separación en la fuente","El tratamiento mediante incineración"], ans: 2, exp: "La separación en la fuente es considerada una de las etapas más importantes porque facilita el reciclaje, compostaje y tratamiento posterior, evitando que los materiales reutilizables se contaminen.", tema: "U4 Residuos" },
+  { q: "¿Qué propone la economía circular respecto a los residuos?", opts: ["Enviarlos a rellenos sanitarios técnicamente controlados","Quemarlos para generar energía eléctrica","Considerarlos recursos que pueden reutilizarse, reciclarse o reintegrarse al sistema productivo","Exportarlos a otros países para su tratamiento"], ans: 2, exp: "La economía circular propone un modelo alternativo al lineal 'producir, usar, desechar', donde los residuos son recursos que se reutilizan, reciclan o reintegran al sistema productivo.", tema: "U4 Economía Circular" },
+  { q: "¿Cuál de los siguientes es un beneficio de la economía circular?", opts: ["Aumenta la extracción de recursos naturales","Reduce residuos, conserva recursos y genera nuevas oportunidades de empleo","Elimina completamente los vertederos","Incrementa el consumo de combustibles fósiles"], ans: 1, exp: "La economía circular reduce residuos y contaminación, conserva recursos naturales, disminuye emisiones de GEI y genera nuevas oportunidades de empleo e innovación.", tema: "U4 Economía Circular" },
+
+  // UNIDAD 5 – Ética y Responsabilidad Ambiental
+  { q: "¿Qué mide la huella ecológica?", opts: ["El volumen de agua usado en la producción de bienes","La cantidad de CO₂ emitido por una persona o empresa","La cantidad de recursos naturales consumidos en relación con la capacidad del planeta para regenerarlos","El número de especies en peligro de extinción en una región"], ans: 2, exp: "La huella ecológica mide la cantidad de recursos naturales que una persona, comunidad o sociedad consume en relación con la capacidad del planeta para regenerarlos.", tema: "U5 Huellas" },
+  { q: "¿En cuántos componentes se divide la huella hídrica?", opts: ["Dos: azul y verde","Tres: azul, verde y gris","Cuatro: azul, verde, gris y negra","Dos: superficial y subterránea"], ans: 1, exp: "La huella hídrica se divide en tres componentes: azul (agua de ríos, lagos y acuíferos), verde (agua de lluvia en el suelo) y gris (agua necesaria para diluir contaminantes).", tema: "U5 Huellas" },
+  { q: "¿Qué representa la huella hídrica gris?", opts: ["El agua de lluvia almacenada en el suelo","El agua extraída de ríos y acuíferos para uso humano","El volumen de agua necesario para diluir contaminantes generados en procesos productivos","El agua evaporada durante la producción agrícola"], ans: 2, exp: "La huella hídrica gris es el volumen de agua necesario para diluir contaminantes generados por actividades humanas hasta alcanzar estándares aceptables de calidad del agua.", tema: "U5 Huellas" },
+  { q: "¿En qué unidad se expresa generalmente la huella de carbono?", opts: ["Litros por año","Hectáreas globales","Toneladas de CO₂ equivalente (CO₂e)","Kilowatts hora (kWh)"], ans: 2, exp: "La huella de carbono se expresa en toneladas de dióxido de carbono equivalente (CO₂e), lo que permite comparar los diferentes gases de efecto invernadero.", tema: "U5 Huellas" },
+  { q: "¿Qué establece el principio de precaución en la ética ambiental?", opts: ["Que el daño ambiental debe repararse una vez ocurrido","Que la falta de certeza científica no debe usarse como razón para posponer medidas que prevengan daños graves al ambiente","Que solo los gobiernos son responsables de proteger el ambiente","Que el desarrollo económico tiene prioridad sobre la protección ambiental"], ans: 1, exp: "El principio de precaución indica que la falta de certeza científica absoluta no debe utilizarse como razón para posponer medidas que prevengan daños graves al ambiente.", tema: "U5 Ética" },
+  { q: "¿Cuál es la diferencia entre el principio de prevención y el principio de precaución?", opts: ["No hay diferencia, son lo mismo","La prevención evita daños conocidos antes de que ocurran; la precaución actúa ante riesgos potenciales aunque no exista certeza científica plena","La precaución actúa después del daño; la prevención no","La prevención solo aplica a empresas; la precaución solo a individuos"], ans: 1, exp: "La prevención evita daños ambientales conocidos antes de que ocurran; la precaución va más allá, actuando ante riesgos potenciales incluso sin certeza científica completa.", tema: "U5 Ética" },
+
+  // UNIDAD 6 – Gestión de Recursos Hídricos
+  { q: "¿Cuántas cuencas hidrográficas principales tiene Panamá?", opts: ["33","18","52","70"], ans: 2, exp: "Panamá cuenta con 52 cuencas hidrográficas principales: 33 en la vertiente del Pacífico y 18 en la vertiente del Caribe.", tema: "U6 Cuencas" },
+  { q: "¿Qué ley constituye el principal marco legal ambiental de Panamá?", opts: ["Ley 44 de 2002","Ley 69 de 2012","Ley 41 de 1998","Ley 295 de 2022"], ans: 2, exp: "La Ley 41 de 1998 (Ley General de Ambiente) constituye el principal marco legal ambiental de Panamá, estableciendo principios para la protección de recursos naturales y el desarrollo sostenible.", tema: "U6 Legislación" },
+  { q: "¿Qué es la eutrofización?", opts: ["Un proceso de purificación natural del agua","El fenómeno donde el exceso de nutrientes provoca proliferación de algas y disminución de oxígeno en el agua","La acumulación de microplásticos en los ecosistemas acuáticos","La filtración de contaminantes a través del suelo hacia aguas subterráneas"], ans: 1, exp: "La eutrofización ocurre cuando el exceso de nutrientes (nitratos, fosfatos) provoca crecimiento masivo de algas, que al descomponerse consumen oxígeno disuelto, generando hipoxia o anoxia.", tema: "U6 Contaminación" },
+  { q: "¿Cuál es el enfoque de la Gestión Integrada de Recursos Hídricos (GIRH)?", opts: ["Gestionar el agua priorizando únicamente el suministro para consumo humano","Administrar el agua de manera coordinada y sostenible, considerando aspectos ambientales, sociales y económicos","Privatizar la distribución del agua para mejorar su eficiencia","Aumentar la extracción de acuíferos subterráneos para satisfacer la demanda"], ans: 1, exp: "La GIRH es un enfoque que administra el agua de manera coordinada y sostenible, considerando simultáneamente aspectos ambientales, sociales y económicos, y el ciclo completo del agua.", tema: "U6 GIRH" },
+  { q: "¿Qué función cumplen los bosques dentro de una cuenca hidrográfica?", opts: ["Aumentan la velocidad de escorrentía hacia los ríos","Actúan como esponjas naturales que almacenan agua y la liberan gradualmente, controlan erosión y mejoran calidad del agua","Impiden la recarga de acuíferos subterráneos","Generan sedimentación en los cauces de los ríos"], ans: 1, exp: "Los bosques funcionan como esponjas naturales que almacenan agua, la liberan gradualmente, reducen erosión, controlan sedimentación y mejoran la calidad del agua que llega a los ríos.", tema: "U6 Cuencas" },
+  { q: "¿Qué establece el Plan Nacional de Seguridad Hídrica 2015–2050 'Agua para Todos'?", opts: ["La privatización del servicio de agua potable en Panamá","Una hoja de ruta para garantizar la seguridad hídrica a largo plazo, incluyendo acceso universal, saneamiento y protección de cuencas","La eliminación de todos los vertederos a cielo abierto del país","El cobro de impuestos por el uso del agua en agricultura"], ans: 1, exp: "El Plan 'Agua para Todos' es una hoja de ruta para garantizar la seguridad hídrica a largo plazo, considerando acceso universal al agua potable, saneamiento, protección de cuencas y adaptación al cambio climático.", tema: "U6 Legislación" },
+
+  // UNIDAD 7 – Energía y Sostenibilidad
+  { q: "¿Cuáles son las '4D' de la Agenda de Transición Energética de Panamá?", opts: ["Desarrollo, Distribución, Digitalización y Diversificación","Descarbonización, Descentralización, Digitalización y Democratización","Descontaminación, Descentralización, Dinamización y Digitalización","Diversificación, Descarbonización, Descentralización y Desregulación"], ans: 1, exp: "Las 4D de la Agenda de Transición Energética son: Descarbonización (reducir CO₂), Descentralización (generar energía más cerca del consumo), Digitalización (tecnologías digitales) y Democratización (acceso equitativo).", tema: "U7 Energía" },
+  { q: "¿Qué ley regula la movilidad eléctrica en Panamá?", opts: ["Ley 41 de 1998","Ley 69 de 2012","Ley 295 de 2022","Ley 44 de 2002"], ans: 2, exp: "En 2022, Panamá aprobó la Ley 295 que establece el marco legal para promover la movilidad eléctrica en el transporte terrestre, incentivando vehículos eléctricos e infraestructura de carga.", tema: "U7 Movilidad" },
+  { q: "¿Qué ley promueve el Uso Racional y Eficiente de la Energía en Panamá?", opts: ["Ley 41 de 1998","Ley 44 de 2002","Ley 69 de 2012","Ley 295 de 2022"], ans: 2, exp: "La Ley 69 de 2012 sobre Uso Racional y Eficiente de la Energía (UREE) promueve el ahorro energético, la reducción de emisiones y la adopción de tecnologías más eficientes en Panamá.", tema: "U7 Energía" },
+  { q: "¿Dónde se ubica el principal parque eólico de Panamá mencionado en el documento?", opts: ["Darién","Bocas del Toro","Coclé","Chiriquí"], ans: 2, exp: "El documento menciona que Panamá cuenta con importantes proyectos eólicos, especialmente en la provincia de Coclé, donde las condiciones de viento son favorables.", tema: "U7 Energía" },
+  { q: "¿Cuál es una desventaja de la energía hidroeléctrica?", opts: ["Genera grandes cantidades de emisiones de CO₂ durante su operación","Altera ecosistemas acuáticos, cambia caudales naturales y depende de la disponibilidad hídrica","Requiere combustibles fósiles para funcionar","No puede generar energía de forma continua"], ans: 1, exp: "Aunque es más limpia que los fósiles, la energía hidroeléctrica tiene desafíos: altera ecosistemas acuáticos, cambia caudales naturales, inunda zonas boscosas y depende de la disponibilidad hídrica.", tema: "U7 Energía" },
+  { q: "¿Qué es la eficiencia energética?", opts: ["Generar la mayor cantidad de energía posible sin importar el costo","Obtener el mismo nivel de servicio o producción utilizando menos energía","Usar exclusivamente energías renovables en todos los procesos","Reducir el consumo eliminando servicios y comodidades"], ans: 1, exp: "La eficiencia energética consiste en obtener el mismo nivel de servicio o producción utilizando menos energía, optimizando procesos y equipos sin afectar el desempeño.", tema: "U7 Eficiencia" },
+  { q: "¿Qué son las auditorías energéticas?", opts: ["Inspecciones tributarias sobre el consumo de combustibles fósiles","Evaluaciones del consumo de energía de instalaciones y procesos para detectar pérdidas y proponer mejoras","Certificaciones obligatorias para instalar paneles solares","Controles gubernamentales sobre empresas generadoras de energía"], ans: 1, exp: "Las auditorías energéticas permiten identificar oportunidades de ahorro evaluando el consumo de energía de instalaciones y procesos, detectando pérdidas, evaluando eficiencia de equipos y proponiendo medidas correctivas.", tema: "U7 Eficiencia" },
+];
+
+let questions = [], current = 0, score = 0, correct = 0, answered = false;
+const icons = ['A','B','C','D'];
+const iconClasses = ['icon-a','icon-b','icon-c','icon-d'];
+
+function shuffle(arr) { return [...arr].sort(() => Math.random() - 0.5); }
+function show(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
+
+function startGame() {
+  questions = shuffle(allQuestions);
+  current = 0; score = 0; correct = 0; answered = false;
+  show('game-screen'); renderQuestion();
+}
+
+function renderQuestion() {
+  answered = false;
+  const q = questions[current];
+  document.getElementById('prog-text').textContent = `Pregunta ${current+1} de ${questions.length}`;
+  document.getElementById('score-display').textContent = score;
+  document.getElementById('prog-bar').style.width = `${Math.round(((current+1)/questions.length)*100)}%`;
+  document.getElementById('q-num').textContent = `Pregunta ${current+1}`;
+  document.getElementById('q-text').textContent = q.q;
+  document.getElementById('q-theme').textContent = q.tema;
+  const grid = document.getElementById('answers');
+  grid.innerHTML = '';
+  q.opts.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'answer-btn';
+    btn.innerHTML = `<span class="ans-icon ${iconClasses[i]}">${icons[i]}</span><span>${opt}</span>`;
+    btn.onclick = () => selectAnswer(i);
+    grid.appendChild(btn);
+  });
+  const fb = document.getElementById('feedback');
+  fb.style.display = 'none'; fb.className = 'feedback';
+  document.getElementById('next-btn').style.display = 'none';
+}
+
+function selectAnswer(idx) {
+  if (answered) return;
+  answered = true;
+  const q = questions[current];
+  const btns = document.querySelectorAll('.answer-btn');
+  btns.forEach(b => b.disabled = true);
+  const fb = document.getElementById('feedback');
+  if (idx === q.ans) {
+    score += 100; correct++;
+    btns[idx].classList.add('correct');
+    fb.className = 'feedback correct';
+    fb.innerHTML = `<strong>✓ ¡Correcto! +100 pts</strong> — ${q.exp}`;
+  } else {
+    btns[idx].classList.add('wrong');
+    btns[q.ans].classList.add('reveal-correct');
+    fb.className = 'feedback wrong';
+    fb.innerHTML = `<strong>✗ Incorrecto.</strong> Correcta: <strong>${q.opts[q.ans]}</strong>. ${q.exp}`;
+  }
+  fb.style.display = 'block';
+  document.getElementById('score-display').textContent = score;
+  const nb = document.getElementById('next-btn');
+  nb.style.display = 'block';
+  nb.textContent = current < questions.length - 1 ? 'Siguiente →' : 'Ver resultados →';
+}
+
+function nextQuestion() {
+  current++;
+  if (current >= questions.length) showEnd();
+  else renderQuestion();
+}
+
+function showEnd() {
+  show('end-screen');
+  const pct = Math.round((correct / questions.length) * 100);
+  let trophy = '🏆', msg = '"¡Excelente! Dominas los temas de gestión ambiental."';
+  if (pct < 50) { trophy = '📖'; msg = '"Sigue repasando las unidades — ¡tú puedes mejorar!"'; }
+  else if (pct < 80) { trophy = '⭐'; msg = '"¡Buen trabajo! Repasa los temas donde fallaste."'; }
+  document.getElementById('trophy').textContent = trophy;
+  document.getElementById('end-score').textContent = `${score} pts`;
+  document.getElementById('end-sub').textContent = `${correct} de ${questions.length} correctas`;
+  document.getElementById('s-correct').textContent = correct;
+  document.getElementById('s-wrong').textContent = questions.length - correct;
+  document.getElementById('s-pct').textContent = pct + '%';
+  document.getElementById('end-msg').textContent = msg;
+}
+
+function restartGame() { startGame(); }
+</script>
+</body>
+</html>
